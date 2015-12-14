@@ -2530,14 +2530,14 @@ EOF
   fi
   for arg in $ac_configure_args; do
     if test `expr -- $arg : "'.*"` = 0; then
-      if test `expr -- $arg : "--.*"` = 0; then
-        break;
+      if test `expr -- $arg : "-.*"` = 0 && test `expr -- $arg : ".*=.*"` = 0; then
+        continue;
       fi
       echo "'$arg' \\" >> config.nice
       CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS '$arg'"
     else
-      if test `expr -- $arg : "'--.*"` = 0; then
-        break;
+      if test `expr -- $arg : "'-.*"` = 0 && test `expr -- $arg : "'.*=.*"` = 0; then
+        continue;
       fi
       echo "$arg \\" >> config.nice
       CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS $arg"
@@ -3850,8 +3850,8 @@ fi
 rm -f conftest*
 
 CPPFLAGS=$old_CPPFLAGS
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PHP_DEBUG" >&5
-$as_echo "$PHP_DEBUG" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PHP_THREAD_SAFETY" >&5
+$as_echo "$PHP_THREAD_SAFETY" >&6; }
 
 ZEND_EXT_TYPE="zend_extension"
 
@@ -5086,6 +5086,7 @@ $as_echo "@%:@define APM_DRIVER_SOCKET 1" >>confdefs.h
   
   ext_builddir=.
   ext_srcdir=$abs_srcdir
+  ext_dir=""
 
   ac_extra=
 
@@ -5093,10 +5094,10 @@ $as_echo "@%:@define APM_DRIVER_SOCKET 1" >>confdefs.h
     PHP_APM_SHARED=no
     
   
-  case "" in
+  case $ext_dir in
   "") ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
-  /*) ac_srcdir=`echo """"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
-  *) ac_srcdir="$abs_srcdir/""/"; ac_bdir="""/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
+  /*) ac_srcdir=`echo "$ext_dir"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
+  *) ac_srcdir="$abs_srcdir/$ext_dir/"; ac_bdir="$ext_dir/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
   
   
@@ -5134,18 +5135,18 @@ EOF
   done
 
 
-    EXT_STATIC="$EXT_STATIC apm"
+    EXT_STATIC="$EXT_STATIC apm;$ext_dir"
     if test "$ext_shared" != "nocli"; then
-      EXT_CLI_STATIC="$EXT_CLI_STATIC apm"
+      EXT_CLI_STATIC="$EXT_CLI_STATIC apm;$ext_dir"
     fi
   else
     if test "$ext_shared" = "shared" || test "$ext_shared" = "yes"; then
       PHP_APM_SHARED=yes
       
-  case "" in
+  case $ext_dir in
   "") ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
-  /*) ac_srcdir=`echo """"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
-  *) ac_srcdir="$abs_srcdir/""/"; ac_bdir="""/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
+  /*) ac_srcdir=`echo "$ext_dir"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
+  *) ac_srcdir="$abs_srcdir/$ext_dir/"; ac_bdir="$ext_dir/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
   
   
@@ -5194,7 +5195,7 @@ EOF
       ;;
     *netware*)
       suffix=nlm
-      link_cmd='$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_apm) -L$(top_builddir)/netware -lphp5lib $(APM_SHARED_LIBADD)'
+      link_cmd='$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_apm) -L$(top_builddir)/netware -lphp7lib $(APM_SHARED_LIBADD)'
       ;;
     *)
       suffix=la
@@ -5231,7 +5232,7 @@ EOF
       ;;
     *netware*)
       suffix=nlm
-      link_cmd='$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_apm) -L$(top_builddir)/netware -lphp5lib $(_SHARED_LIBADD)'
+      link_cmd='$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_apm) -L$(top_builddir)/netware -lphp7lib $(_SHARED_LIBADD)'
       ;;
     *)
       suffix=la
@@ -5272,10 +5273,10 @@ _ACEOF
       cgi|embed)
         
   
-  case "" in
+  case $ext_dir in
   "") ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
-  /*) ac_srcdir=`echo """"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
-  *) ac_srcdir="$abs_srcdir/""/"; ac_bdir="""/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
+  /*) ac_srcdir=`echo "$ext_dir"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
+  *) ac_srcdir="$abs_srcdir/$ext_dir/"; ac_bdir="$ext_dir/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
   
   
@@ -5313,15 +5314,15 @@ EOF
   done
 
 
-        EXT_STATIC="$EXT_STATIC apm"
+        EXT_STATIC="$EXT_STATIC apm;$ext_dir"
         ;;
       *)
         
   
-  case "" in
+  case $ext_dir in
   "") ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
-  /*) ac_srcdir=`echo """"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
-  *) ac_srcdir="$abs_srcdir/""/"; ac_bdir="""/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
+  /*) ac_srcdir=`echo "$ext_dir"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
+  *) ac_srcdir="$abs_srcdir/$ext_dir/"; ac_bdir="$ext_dir/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
   
   
@@ -5361,7 +5362,7 @@ EOF
 
         ;;
     esac
-    EXT_CLI_STATIC="$EXT_CLI_STATIC apm"
+    EXT_CLI_STATIC="$EXT_CLI_STATIC apm;$ext_dir"
   fi
   
   
@@ -9190,7 +9191,7 @@ freebsd* | dragonfly*)
     objformat=`/usr/bin/objformat`
   else
     case $host_os in
-    freebsd[123]*) objformat=aout ;;
+    freebsd[123].*) objformat=aout ;;
     *) objformat=elf ;;
     esac
   fi
@@ -11270,7 +11271,7 @@ if test -z "$aix_libpath"; then aix_libpath="/usr/lib:/lib"; fi
 	;;
     esac
     ;;
-  freebsd[12]*)
+  freebsd[12].*)
     # C++ shared libraries reported to be fairly broken before switch to ELF
     ld_shlibs_CXX=no
     ;;
@@ -12823,7 +12824,7 @@ freebsd* | dragonfly*)
     objformat=`/usr/bin/objformat`
   else
     case $host_os in
-    freebsd[123]*) objformat=aout ;;
+    freebsd[123].*) objformat=aout ;;
     *) objformat=elf ;;
     esac
   fi
